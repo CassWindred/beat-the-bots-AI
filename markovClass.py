@@ -17,7 +17,19 @@ class Markov:
             else:
                 g = min(newMoves, key = newMoves.get[-1])
                 finish = str(random.choice(list("12345".replace(g,""))))
-        return "12345"[("12345".index(finish)+1)%6]
+        y = "12345"[("12345".index(finish)+1)%6]
+        if (y == 1):
+            return random.choice(losing_pairs[Actions.ROCK]).value
+        elif (y == 2):
+            return random.choice(losing_pairs[Actions.PAPER]).value
+        elif (y == 3):
+            return random.choice(losing_pairs[Actions.SCISSORS]).value
+        elif (y == 4):
+            return random.choice(losing_pairs[Actions.DYNAMITE]).value
+        else:
+            return random.choice(losing_pairs[Actions.WATERBOMB]).value
+
+
     def run(self,move):
         if len(self.recentMoves) < self.len:
             self.recentMoves.append(move)
@@ -27,7 +39,8 @@ class Markov:
 
 x = Markov()
 ## every time we get a number
-x.run(number)
+x.run(NUMBERGOESHERE)
 
-x.mainMarkov()
+print(x.mainMarkov())
 ## returns what we think they will give next
+
