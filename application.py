@@ -93,10 +93,6 @@ class Start(Resource):
         print('Dynamite Count: ' + str(self.game_state.dynamiteCount))
 
 
-def getstate():
-    global state
-    return state
-
 def dynamiteratio():
     global state
     return state.oppDynamiteCount / (state.maxRounds - state.turnCount)
