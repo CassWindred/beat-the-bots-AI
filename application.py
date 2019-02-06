@@ -90,6 +90,16 @@ class Start(Resource):
         print('Dynamite Count: ' + str(self.game_state.dynamiteCount))
 
 
+def getstate():
+    global state
+    return state
+
+
+
+
+
+
+move = None
 # Init game state
 state = GameState()
 
