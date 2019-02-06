@@ -37,7 +37,6 @@ opponent_decision_making = {
 # opponent's previous move
 # our previous move
 # identifies whether the opponent's algorithm is making decisions based on our/their past moves, NOT including repetition
-# does NOT make any move suggestions itself
 
 
 def previous_moves_comparison(our_previous_moves, oppPreviousMoves):
