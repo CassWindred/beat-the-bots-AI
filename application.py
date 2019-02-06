@@ -62,6 +62,7 @@ class Move(Resource):
 
         # Store last move in the game state
         self.game_state.oppPreviousMoves.append(args['lastOpponentMove'])
+        movereceived(args['lastOpponentMove'])
 
 
 class Start(Resource):
@@ -100,9 +101,9 @@ def dynamiteratio():
     global state
     return state.oppDynamiteCount / (state.maxRounds - state.turnCount)
 
-def movereceived(move):
+def movereceived(moveinp):
     global state
-    if move == "dynamite":
+    if moveinp == "dynamite":
         state.oppDynamiteCount+=1
 
 def choosemove():
@@ -116,11 +117,17 @@ def choosemove():
 
 
     if len(options)==0:
-        return Actions(random.randint(1, 5)).name
+        actiontotake=Actions(random.randint(1, 5)).name
+        state.PreviousMoves.append(actiontotake)
+        return actiontotake
     elif len(options)==1:
-        return Actions(options[0]).name
+        actiontotake=Actions(options[0]).name
+        state.PreviousMoves.append(actiontotake)
+        return actiontotake
     elif len(options)>1:
-        return Actions(options[random.randint(0,len(options)-1)])
+        actiontotake = Actions(options[random.randint(0,len(options)-1)])
+        state.PreviousMoves.append(actiontotake)
+        return actiontotake
     else:
         print("Aaaaaa error this wasnt supposed to happen im sad")
 
