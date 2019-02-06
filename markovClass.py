@@ -3,7 +3,7 @@ import itertools, random
 class Markov:
     def __init__(self):
         self.len = 7
-        self.combinations = {i:0 for i in list(itertools.product("12345",repeat=self.len+1))}
+        self.combinations = {i:0 for i in list(itertools.product("12345",repeat=self.len))}
         self.recentMoves = []
     def mainMarkov(self):
         possibleMoves = [i for i in self.combinations.keys() if tuple(self.recentMoves) == i[:-1]]
