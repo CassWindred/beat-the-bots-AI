@@ -159,18 +159,15 @@ def previous_moves_comparison():
     if beat_opp_prev_ratio > 0.5:
         action = random.choice(losing_pairs[opponents_last_move])
 
-    beat_our_prev_ratio = opponent_decision_making["beat_our_prev"]/len(
-        oppPreviousMoves)
+        beat_our_prev_ratio = opponent_decision_making["beat_our_prev"]/len(oppPreviousMoves)
     if beat_our_prev_ratio > 0.5:
-        action = random.choice(losing_pairs[our_pr+evious_move])
+        action = random.choice(losing_pairs[our_previous_move])
 
-    lose_opp_prev_ratio = opponent_decision_making["lose_opp_prev"]/len(
-        oppPreviousMoves)
+        lose_opp_prev_ratio = opponent_decision_making["lose_opp_prev"]/len(oppPreviousMoves)
     if lose_opp_prev_ratio > 0.5:
         action = random.choice(winning_pairs[opponents_last_move])
 
-    lose_our_prev_ratio = opponent_decision_making["lose_our_prev"]/len(
-        oppPreviousMoves)
+    lose_our_prev_ratio = opponent_decision_making["lose_our_prev"]/len(oppPreviousMoves)
     if lose_our_prev_ratio > 0.5:
         action = random.choice(winning_pairs[our_previous_move])
 
