@@ -21,11 +21,13 @@ parser.add_argument('dynamiteCount', type=int)
 # Game state
 class GameState():
     oppPreviousMoves = list()
+    PreviousMoves = list()
     turnCount = 0
     opponentName = ""
     pointsToWin = 0
     maxRounds = 0
     dynamiteCount = 0
+    oppDynamiteCount = 0
 
 
 # Available moves
@@ -50,7 +52,7 @@ class Move(Resource):
         self.game_state.turnCount = self.game_state.turnCount + 1
 
         # Respond randomly
-        return make_response(Actions(random.randint(1, 5)).name, 200)
+        return make_response(choosemove(), 200)
 
     # Recieving opponent's last move
     def post(self):
@@ -93,6 +95,35 @@ class Start(Resource):
 def getstate():
     global state
     return state
+
+def dynamiteratio():
+    global state
+    return state.oppDynamiteCount / (state.maxRounds - state.turnCount)
+
+def movereceived(move):
+    global state
+    if move == "dynamite":
+        state.oppDynamiteCount+=1
+
+def choosemove():
+    options=[]
+    global state
+    merryoption = merryfunction()
+    dratio=dynamiteratio()
+    if merryoption is not None:
+        if not (merryoption==4 and dratio<0.01):
+            options.append(merryoption)
+
+
+    if len(options)==0:
+        return Actions(random.randint(1, 5)).name
+    elif len(options)==1:
+        return Actions(options[0]).name
+    elif len(options)>1:
+        return Actions(options[random.randint(0,len(options)-1)])
+    else:
+        print("Aaaaaa error this wasnt supposed to happen im sad")
+
 
 
 
