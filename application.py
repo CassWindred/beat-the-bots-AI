@@ -18,14 +18,7 @@ parser.add_argument('maxRounds', type=int)
 parser.add_argument('dynamiteCount', type=int)
 
 # dictionary mapping each action to the actions it wins against
-winning_pairs = {Actions.ROCK: [Actions.SCISSORS, Actions.WATERBOMB], Actions.PAPER: [Actions.ROCK, Actions.WATERBOMB],
-                 Actions.SCISSORS: [Actions.PAPER, Actions.WATERBOMB], Actions.DYNAMITE: [Actions.ROCK, Actions.PAPER, Actions.SCISSORS],
-                 Actions.WATERBOMB: [Actions.DYNAMITE]}
 
-# dictionary mapping each action to the actions it loses against
-losing_pairs = {Actions.ROCK: [Actions.DYNAMITE, Actions.PAPER], Actions.PAPER: [Actions.SCISSORS, Actions.DYNAMITE],
-                Actions.SCISSORS: [Actions.ROCK, Actions.DYNAMITE], Actions.DYNAMITE: [Actions.WATERBOMB],
-                Actions.WATERBOMB: [Actions.ROCK, Actions.PAPER, Actions.SCISSORS]}
 
 # keeps track of how often the AI's move abides by each condition
 opponent_decision_making = {
@@ -51,6 +44,14 @@ class Actions(Enum):
     DYNAMITE = 4
     WATERBOMB = 5
 
+winning_pairs = {Actions.ROCK: [Actions.SCISSORS, Actions.WATERBOMB], Actions.PAPER: [Actions.ROCK, Actions.WATERBOMB],
+                 Actions.SCISSORS: [Actions.PAPER, Actions.WATERBOMB], Actions.DYNAMITE: [Actions.ROCK, Actions.PAPER, Actions.SCISSORS],
+                 Actions.WATERBOMB: [Actions.DYNAMITE]}
+
+# dictionary mapping each action to the actions it loses against
+losing_pairs = {Actions.ROCK: [Actions.DYNAMITE, Actions.PAPER], Actions.PAPER: [Actions.SCISSORS, Actions.DYNAMITE],
+                Actions.SCISSORS: [Actions.ROCK, Actions.DYNAMITE], Actions.DYNAMITE: [Actions.WATERBOMB],
+                Actions.WATERBOMB: [Actions.ROCK, Actions.PAPER, Actions.SCISSORS]}
 
 class Move(Resource):
     game_state = None
@@ -128,11 +129,11 @@ def previous_moves_comparison():
     global state
 
     # checks the opponent's most recent move against both its and our previous moves, and increments the_opponent+decision_making dictionary appropriately
-    if len(our_previous_moves) >= 1 and len(oppPreviousMoves) >= 2:
+    if len(state.PreviousMoves) >= 1 and len(state.oppPreviousMoves) >= 2:
         opponents_last_move = state.oppPreviousMoves[-1]
         opponents_previous_move = state.oppPreviousMoves[-2]
 
-        our_previous_move = PreviousMoves[-2]
+        our_previous_move = state.PreviousMoves[-2]
 
         # does the opponent choose the action which would beat their previous move?
         if opponents_previous_move in winning_pairs[opponents_last_move]:
@@ -154,14 +155,14 @@ def previous_moves_comparison():
     action = None
 
     beat_opp_prev_ratio = opponent_decision_making["beat_opp_prev"]/len(
-        oppPreviousMoves)
+        state.oppPreviousMoves)
     if beat_opp_prev_ratio > 0.5:
         action = random.choice(losing_pairs[opponents_last_move])
 
     beat_our_prev_ratio = opponent_decision_making["beat_our_prev"]/len(
         oppPreviousMoves)
     if beat_our_prev_ratio > 0.5:
-        action = random.choice(losing_pairs[our_previous_move])
+        action = random.choice(losing_pairs[our_pr+evious_move])
 
     lose_opp_prev_ratio = opponent_decision_making["lose_opp_prev"]/len(
         oppPreviousMoves)
