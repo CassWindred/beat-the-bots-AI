@@ -17,15 +17,23 @@ parser.add_argument('pointsToWin', type=int)
 parser.add_argument('maxRounds', type=int)
 parser.add_argument('dynamiteCount', type=int)
 
+# dictionary mapping each action to the actions it wins against
+
+
+# keeps track of how often the AI's move abides by each condition
+opponent_decision_making = {
+    "beat_opp_prev": 0, "beat_our_prev": 0, "lose_opp_prev": 0, "lose_our_prev": 0}
 
 # Game state
 class GameState():
     oppPreviousMoves = list()
+    PreviousMoves = list()
     turnCount = 0
     opponentName = ""
     pointsToWin = 0
     maxRounds = 0
     dynamiteCount = 0
+    oppDynamiteCount = 0
 
 
 # Available moves
@@ -36,6 +44,14 @@ class Actions(Enum):
     DYNAMITE = 4
     WATERBOMB = 5
 
+winning_pairs = {Actions.ROCK: [Actions.SCISSORS, Actions.WATERBOMB], Actions.PAPER: [Actions.ROCK, Actions.WATERBOMB],
+                 Actions.SCISSORS: [Actions.PAPER, Actions.WATERBOMB], Actions.DYNAMITE: [Actions.ROCK, Actions.PAPER, Actions.SCISSORS],
+                 Actions.WATERBOMB: [Actions.DYNAMITE]}
+
+# dictionary mapping each action to the actions it loses against
+losing_pairs = {Actions.ROCK: [Actions.DYNAMITE, Actions.PAPER], Actions.PAPER: [Actions.SCISSORS, Actions.DYNAMITE],
+                Actions.SCISSORS: [Actions.ROCK, Actions.DYNAMITE], Actions.DYNAMITE: [Actions.WATERBOMB],
+                Actions.WATERBOMB: [Actions.ROCK, Actions.PAPER, Actions.SCISSORS]}
 
 class Move(Resource):
     game_state = None
@@ -50,7 +66,7 @@ class Move(Resource):
         self.game_state.turnCount = self.game_state.turnCount + 1
 
         # Respond randomly
-        return make_response(Actions(random.randint(1, 5)).name, 200)
+        return make_response(choosemove(), 200)
 
     # Recieving opponent's last move
     def post(self):
@@ -60,6 +76,7 @@ class Move(Resource):
 
         # Store last move in the game state
         self.game_state.oppPreviousMoves.append(args['lastOpponentMove'])
+        movereceived(args['lastOpponentMove'])
 
 
 class Start(Resource):
@@ -89,10 +106,104 @@ class Start(Resource):
         print('Max rounds: ' + str(self.game_state.maxRounds))
         print('Dynamite Count: ' + str(self.game_state.dynamiteCount))
 
+        for key in opponent_decision_making:
+            opponent_decision_making[key] = 0
 
-def getstate():
+
+def dynamiteratio():
     global state
-    return state
+    return state.oppDynamiteCount / (state.maxRounds - state.turnCount)
+
+def movereceived(moveinp):
+    global state
+    if moveinp == "dynamite":
+        state.oppDynamiteCount+=1
+
+# compares the previous move of the opponent on turn x to;
+# opponent's previous move
+# our previous move
+# identifies whether the opponent's algorithm is making decisions based on our/their past moves, NOT including repetition
+
+def previous_moves_comparison():
+
+    global state
+
+    # checks the opponent's most recent move against both its and our previous moves, and increments the_opponent+decision_making dictionary appropriately
+    if len(state.PreviousMoves) >= 1 and len(state.oppPreviousMoves) >= 2:
+        opponents_last_move = state.oppPreviousMoves[-1]
+        opponents_previous_move = state.oppPreviousMoves[-2]
+
+        our_previous_move = state.PreviousMoves[-2]
+
+        # does the opponent choose the action which would beat their previous move?
+        if opponents_previous_move in winning_pairs[opponents_last_move]:
+            opponent_decision_making["beat_opp_prev"] += 1
+
+        # does the opponent choose the action which would beat our last move?
+        if our_previous_move in winning_pairs[opponents_last_move]:
+            opponent_decision_making["beat_our_prev"] += 1
+
+        # does the opponent choose the action which would lose to their previous move?
+        if opponents_last_move in winning_pairs[opponents_previous_move]:
+            opponent_decision_making["lose_opp_prev"] += 1
+
+        # does the opponent choose the action which would lose to our previous move?
+        if opponents_last_move in winning_pairs[our_previous_move]:
+            opponent_decision_making["lose_our_prev"] += 1
+
+    # decides if there is enough evidence in opponent_decision_making to accurately predict their next move
+    action = None
+
+    beat_opp_prev_ratio = opponent_decision_making["beat_opp_prev"]/len(
+        state.oppPreviousMoves)
+    if beat_opp_prev_ratio > 0.5:
+        action = random.choice(losing_pairs[opponents_last_move])
+
+    beat_our_prev_ratio = opponent_decision_making["beat_our_prev"]/len(
+        oppPreviousMoves)
+    if beat_our_prev_ratio > 0.5:
+        action = random.choice(losing_pairs[our_pr+evious_move])
+
+    lose_opp_prev_ratio = opponent_decision_making["lose_opp_prev"]/len(
+        oppPreviousMoves)
+    if lose_opp_prev_ratio > 0.5:
+        action = random.choice(winning_pairs[opponents_last_move])
+
+    lose_our_prev_ratio = opponent_decision_making["lose_our_prev"]/len(
+        oppPreviousMoves)
+    if lose_our_prev_ratio > 0.5:
+        action = random.choice(winning_pairs[our_previous_move])
+
+    if action:
+        return action.value
+    else:
+        return None
+
+def choosemove():
+    options=[]
+    global state
+    merryoption = previous_moves_comparison()
+    dratio=dynamiteratio()
+    if merryoption is not None:
+        if not (merryoption==4 and dratio<0.01):
+            options.append(merryoption)
+
+
+    if len(options)==0:
+        actiontotake=Actions(random.randint(1, 5)).name
+        state.PreviousMoves.append(actiontotake)
+        return actiontotake
+    elif len(options)==1:
+        actiontotake=Actions(options[0]).name
+        state.PreviousMoves.append(actiontotake)
+        return actiontotake
+    elif len(options)>1:
+        actiontotake = Actions(options[random.randint(0,len(options)-1)])
+        state.PreviousMoves.append(actiontotake)
+        return actiontotake
+    else:
+        print("Aaaaaa error this wasnt supposed to happen im sad")
+
 
 
 
