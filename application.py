@@ -109,10 +109,6 @@ class Start(Resource):
             opponent_decision_making[key] = 0
 
 
-def getstate():
-    global state
-    return state
-
 def dynamiteratio():
     global state
     return state.oppDynamiteCount / (state.maxRounds - state.turnCount)
